@@ -23,14 +23,10 @@ namespace imjch_std{
         }
 
         void push(const value_type& val){
-            try{
                 node_type* new_node = new node_type(val);
                 new_node->next = top_node;
                 top_node = new_node;
-                ++count;
-            }
-            catch (std::bad_alloc e){
-                throw;
+                ++count；
             }
         }
 
