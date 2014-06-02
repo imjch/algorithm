@@ -6,13 +6,14 @@ namespace imjch_std{
     class tree_node{
     public:
         typedef tree_node<T>* link_type;
-        tree_node(const T& val) :parent(nullptr), left(nullptr), right(nullptr), value(val)
+        tree_node(const T& val) :parent(nullptr), left(nullptr), right(nullptr), value(val), height(0)
         {}
         ~tree_node(){}
         link_type parent;
         link_type left;
         link_type right;
         T value;
+        int height;
     };
 }
 #endif /* TREE_NODE_H_ */

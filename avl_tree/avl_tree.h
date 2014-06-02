@@ -3,7 +3,7 @@
 #include <memory>
 template <class T> class tree_node;
 namespace imjch_std {
-    template<class K,class V,class KeyOfValue,class Compare>
+    template<class K, class V, class KeyOfValue, class Compare>
     class avl_tree{
     public:
         typedef size_t size_type;
@@ -16,17 +16,55 @@ namespace imjch_std {
         typedef value_type* pointer;
         typedef const value_type* const_pointer;
         typedef node_type* link_type;
-        avl_tree():node_count(0){}
-        ~avl_tree(){}
-        static link_type left(link_type x)
+
+        avl_tree(const Compare& comp = Compare()) :node_count(0), compare(comp)
+        {
+            init();
+        }
+        ~avl_tree()
+        {
+            clean();
+            put_node(head);
+        }
+
+
+        void insert_unique(const V& v)
+        {
+            link_type x_parent;
+            link_type x = root();
+            bool compare_flag = true;
+            while (x!=nullptr)
+            {
+                x_parent = x;
+                compare_flag = compare(KeyOfValue()(v),key(x));//if the key of v is less than the key of x,then return true;
+                if (compare_flag)
+                {
+                    x = left(x);
+                }
+                else
+                {
+                    x = right(x);
+                }
+            }
+            //todo:insert the node to the apparent place.
+        }
+
+
+    private:
+        std::allocator<node_type> alloc;
+        size_type node_count;
+        link_type head;//parent=>root,left=>minimum,right=>maximum
+        Compare compare;
+
+        static link_type& left(link_type x)
         {
             return x->left;
         }
-        static link_type right(link_type x)
+        static link_type& right(link_type x)
         {
             return x->right;
         }
-        static link_type parent(link_type x)
+        static link_type& parent(link_type x)
         {
             return x->parent;
         }
@@ -41,7 +79,7 @@ namespace imjch_std {
 
         static link_type maximum(link_type x)
         {
-            while (x->right!=nullptr)
+            while (x->right != nullptr)
             {
                 x = x->right;
             }
@@ -57,13 +95,40 @@ namespace imjch_std {
             return x;
         }
 
-    private:
-        std::allocator<node_type> alloc;
-        size_type node_count;
-       // link_type head;
-        Compare compare;
+        void init()
+        {
+            head = get_node();
+            root() = nullptr;
+            left_most() = head;
+            right_most() = head;
+        }
 
+        void clean()
+        {
+            //deallocate all the nodes.
+        }
+//get the root,left_most and right_most
+        link_type& root()
+        {
+            return head->parent;
+        }
 
+        link_type& left_most()//get the node storing minimum value
+        {
+            return head->left;
+        }
+
+        link_type& right_most()//get the node storing maximum value
+        {
+            return head->right;
+        }
+
+        int height(link_type x)
+        {
+            return x->height;
+        }
+
+//manage the allocation and deallocation of memory
         link_type get_node(){
             return alloc.allocate(1);
         }
@@ -73,9 +138,14 @@ namespace imjch_std {
         link_type create_node(const value_type& x)
         {
             link_type tmp = get_node();
-            construct(&tmp->value,x);
+            construct(&tmp->value, x);
             return tmp;
         }
+        void construct(value_type* val, value_type& v)
+        {
+            alloc.construct(val, v);
+        }
+
         link_type clone_node(link_type x)
         {
             link_type tmp = create_node(x->value);
@@ -83,10 +153,7 @@ namespace imjch_std {
             tmp->right = nullptr;
             return tmp;
         }
-        void construct(value_type* val,value_type& v)
-        {
-            alloc.construct(val,v);
-        }
+        
         void destroy_node(link_type p)
         {
             destroy(&p->value);
