@@ -19,33 +19,33 @@ namespace imjch_std {
 
         avl_tree(const Compare& comp = Compare()) :node_count(0), compare(comp)
         {
-            init();
+            //init();
         }
         ~avl_tree()
         {
             clean();
-            put_node(head);
+            //put_node(head);
         }
 
+        bool empty()
+        {
+            return node_count == 0;
+        }
 
+        size_type size()
+        {
+            return node_count;
+        }
+
+        // no restrict
+        void insert_equal()
+        {
+            
+        }
+
+        //it is not allowed to be repeated
         void insert_unique(const V& v)
         {
-            link_type x_parent;
-            link_type x = root();
-            bool compare_flag = true;
-            while (x!=nullptr)
-            {
-                x_parent = x;
-                compare_flag = compare(KeyOfValue()(v),key(x));//if the key of v is less than the key of x,then return true;
-                if (compare_flag)
-                {
-                    x = left(x);
-                }
-                else
-                {
-                    x = right(x);
-                }
-            }
             //todo:insert the node to the apparent place.
         }
 
@@ -53,7 +53,7 @@ namespace imjch_std {
     private:
         std::allocator<node_type> alloc;
         size_type node_count;
-        link_type head;//parent=>root,left=>minimum,right=>maximum
+        //link_type head;//parent=>root,left=>minimum,right=>maximum
         Compare compare;
 
         static link_type& left(link_type x)
@@ -95,33 +95,25 @@ namespace imjch_std {
             return x;
         }
 
-        void init()
-        {
-            head = get_node();
-            root() = nullptr;
-            left_most() = head;
-            right_most() = head;
-        }
-
         void clean()
         {
             //deallocate all the nodes.
         }
 //get the root,left_most and right_most
-        link_type& root()
-        {
-            return head->parent;
-        }
+        //link_type& root()
+        //{
+        //    return head->parent;
+        //}
 
-        link_type& left_most()//get the node storing minimum value
-        {
-            return head->left;
-        }
+        //link_type& left_most()//get the node storing minimum value
+        //{
+        //    return head->left;
+        //}
 
-        link_type& right_most()//get the node storing maximum value
-        {
-            return head->right;
-        }
+        //link_type& right_most()//get the node storing maximum value
+        //{
+        //    return head->right;
+        //}
 
         int height(link_type x)
         {
