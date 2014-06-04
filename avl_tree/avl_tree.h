@@ -3,6 +3,7 @@
 #include <memory>
 #include <cmath>
 #include "imjch_utility.h"
+#include <map>
 template <class T> class avl_tree_node;
 namespace imjch_std
 {
@@ -57,27 +58,56 @@ namespace imjch_std
             insert(root(), header, val);
         }
 
-        bool find(const value_type& val)
+        std::pair<link_type,bool> find(const value_type& val)
         {
-            link_type p = root();
-            while (p != nullptr)
+            link_type tmp = root();
+            link_type p;
+            bool flag = false;
+            while (tmp != nullptr)
             {
-                if (p->value == val)
+                p = tmp->parent;
+                if (tmp->value == val)
                 {
-                    return true;
+                    flag = true;
+                    return pair<link_type,bool>(tmp, flag);
                 }
-                else if (key_compare(KeyOfValue()(val), key(p)))
+                else if (key_compare(KeyOfValue()(val), key(tmp)))
                 {
-                    p = p->left;
+                    tmp = tmp->left;
                 }
                 else
                 {
-                    p = p->right;
+                    tmp = tmp->right;
                 }
             }
-            return false;
+            return pair<link_type, bool>(p, flag);
+        }
+        const value_type& get_min()
+        {
+            return min_node()->value;
         }
 
+        const value_type& get_max()
+        {
+            return max_node()->value;
+        }
+        static link_type maximum(link_type x)
+        {
+            while (x->right != nullptr)
+            {
+                x = x->right;
+            }
+            return x;
+        }
+
+        static link_type minimum(link_type x)
+        {
+            while (x->left != nullptr)
+            {
+                x = x->left;
+            }
+            return x;
+        }
 
     private:
         std::allocator<node_type> alloc;
@@ -89,6 +119,8 @@ namespace imjch_std
         {
             header = get_node();
             root() = nullptr;
+            max_node() = header;
+            min_node() = header;
         }
 
         int height(link_type x)
@@ -139,6 +171,8 @@ namespace imjch_std
             return  left_rotate(x);
         }
 
+
+
         void insert(link_type& node, link_type& parent, const V& val)
         {
             //initialize a new node
@@ -150,6 +184,26 @@ namespace imjch_std
                 node->right = nullptr;
                 node->height = 0;
                 ++node_count;
+                //a delicated method of recording the max and min
+                if (parent==header)
+                {
+                    max_node() = node;
+                    min_node() = node;
+                }
+                if (parent == max_node())
+                {
+                    if (val>=parent->value)
+                    {
+                        max_node() = node;
+                    }
+                }
+                if (parent == min_node())
+                {
+                    if (val<=parent->value)
+                    {
+                        min_node() = node;
+                    }
+                }
             }
             //decide which direction the new_node is 
             else if (key_compare(KeyOfValue()(val), key(node)))
@@ -191,23 +245,7 @@ namespace imjch_std
         }
 
 
-        static link_type maximum(link_type x)
-        {
-            while (x->right != nullptr)
-            {
-                x = x->right;
-            }
-            return x;
-        }
 
-        static link_type minimum(link_type x)
-        {
-            while (x->left != nullptr)
-            {
-                x = x->left;
-            }
-            return x;
-        }
 
         void clean(link_type p)
         {
@@ -219,21 +257,21 @@ namespace imjch_std
             }
         }
 
-        //        get the root,left_most and right_most
+        //get the root,left_most and right_most
         link_type& root()
         {
             return header->parent;
         }
 
-        //link_type& left_most()//get the node storing minimum value
-        //{
-        //    return header->left;
-        //}
+        link_type& min_node()//get the node storing minimum value
+        {
+            return header->left;
+        }
 
-        //link_type& right_most()//get the node storing maximum value
-        //{
-        //    return header->right;
-        //}
+        link_type& max_node()//get the node storing maximum value
+        {
+            return header->right;
+        }
 
         //manage the allocation and deallocation of memory
         link_type get_node(){
