@@ -4,6 +4,7 @@
 #include <cmath>
 #include "imjch_utility.h"
 #include <map>
+#include "avl_tree_iterator.h"
 template <class T> class avl_tree_node;
 namespace imjch_std
 {
@@ -15,12 +16,13 @@ namespace imjch_std
         typedef K key_type;
         typedef V value_type;
         typedef avl_tree_node<V> node_type;
-        /*typedef value_type& reference;
-        typedef const value_type& const_reference;*/
+        typedef value_type& reference;
+        typedef const value_type& const_reference;
         typedef ptrdiff_t difference_type;
         typedef value_type* pointer;
         typedef const value_type* const_pointer;
         typedef node_type* link_type;
+        typedef avl_tree_iterator<value_type, reference, pointer> iterator;
 
         avl_tree(const Compare& comp = Compare()) :node_count(0), key_compare(comp)
         {
@@ -32,6 +34,15 @@ namespace imjch_std
             put_node(header);
         }
 
+        iterator begin()
+        {
+            return iterator(min_node());
+        }
+        iterator end()
+        {
+            return iterator(header);
+        }
+
         bool empty()
         {
             return node_count == 0;
@@ -41,6 +52,8 @@ namespace imjch_std
         {
             return node_count;
         }
+
+
 
         // it is allowed that two node sharing the same key
         void insert_equal(const value_type& val)
@@ -142,7 +155,13 @@ namespace imjch_std
             link_type tmp;
             tmp = x->left;
             x->left = tmp->right;
+            if (tmp->right!=nullptr)
+            {
+                tmp->right->parent = x;
+            }
             tmp->right = x;
+            tmp->parent = x->parent;
+            x->parent = tmp;
             update_height(x);
             update_height(tmp);
             return tmp;
@@ -153,7 +172,13 @@ namespace imjch_std
             link_type tmp;
             tmp = x->right;
             x->right = tmp->left;
+            if (tmp->left!=nullptr)
+            {
+                tmp->left->parent = x;
+            }
             tmp->left = x;
+            tmp->parent = x->parent;
+            x->parent = tmp;
             update_height(x);
             update_height(tmp);
             return tmp;
@@ -168,12 +193,13 @@ namespace imjch_std
         link_type right_left_rotate(link_type x)
         {
             x->right = right_rotate(x->right);
+
             return  left_rotate(x);
         }
 
 
 
-        void insert(link_type& node, link_type& parent, const V& val)
+        void insert(link_type& node, link_type parent, const V& val)
         {
             //initialize a new node
             if (node == nullptr)
