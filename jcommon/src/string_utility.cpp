@@ -4,8 +4,8 @@
 #include <cassert>
 #include <iterator>
 #include <sstream>
-#include "string_utility.h"
 
+#include "string_utility.h"
 
 
 std::string string_utility::to_upper_copy(std::string& str){
